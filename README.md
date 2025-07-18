@@ -1,89 +1,80 @@
-# Next.js 15 App Router Project
+# Next.js Debugger + Sentry Issue Reproduction
 
-A basic Next.js 15 project using the app router, TypeScript, and modern React features.
+This repository demonstrates an issue where breakpoints don't work when Sentry is enabled using `withSentryConfig`.
 
-## Features
+## Setup
 
-- **Next.js 15** - Latest version with app router
-- **TypeScript** - Type-safe development
-- **App Router** - File-based routing system
-- **Server Components** - Default server-side rendering
-- **API Routes** - Backend API endpoints for testing
-- **Modern UI** - Clean and responsive design
-
-## Getting Started
-
-1. **Install dependencies:**
+1. Clone this repository
+2. Install dependencies:
    ```bash
-   npm install
-   # or
    yarn install
    ```
 
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+## Issue Description
 
-3. **Open your browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+When using Sentry's `withSentryConfig` in `next.config.mjs`, breakpoints set in both the middleware (`src/middleware.ts`) and API routes don't work. This can be demonstrated using two different launch configurations.
 
-## Project Structure
+## How to Test
 
-```
-src/
-├── app/
-│   ├── about/
-│   │   └── page.tsx      # About page
-│   ├── api/
-│   │   └── test/
-│   │       └── route.ts  # API route for testing
-│   ├── globals.css       # Global styles
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Home page (with API testing)
-├── next.config.mjs       # Next.js configuration
-├── package.json          # Dependencies and scripts
-└── tsconfig.json         # TypeScript configuration
-```
+### Test Case 1: Without Sentry (Breakpoints Work)
 
-## Available Scripts
+1. In VS Code, select the "WITHOUT SENTRY: debug server-side" configuration
+2. Start debugging (F5)
+3. Set breakpoints in:
+   - `src/middleware.ts` at the line with `console.log("Add a breakpoint here")`
+   - `src/app/api/test/route.ts` at the lines with `console.log("Add a breakpoint here")`
+4. Visit http://localhost:3000 and click either the "Test GET Request" or "Test POST Request" button
+5. Observe that all breakpoints are hit and debugging works as expected
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+### Test Case 2: With Sentry (Breakpoints Do Not Work)
 
-## API Testing
+1. In VS Code, select the "WITH SENTRY: debug server-side" configuration
+2. Start debugging (F5)
+3. Set breakpoints in:
+   - `src/middleware.ts` at the line with `console.log("Add a breakpoint here")`
+   - `src/app/api/test/route.ts` at the lines with `console.log("Add a breakpoint here")`
+4. Visit http://localhost:3000 and click either the "Test GET Request" or "Test POST Request" button
+5. Observe that none of the breakpoints are hit (although the console.log outputs appear in the terminal)
 
-The project includes a test API endpoint at `/api/test` that supports both GET and POST requests:
+## VS Code Launch Configuration
 
-### GET Request
-```
-GET /api/test?name=YourName
-```
+The repository includes the following launch configuration in `.vscode/launch.json`:
 
-### POST Request
-```
-POST /api/test
-Content-Type: application/json
-
+```json
 {
-  "name": "Next.js 15",
-  "type": "Framework",
-  "version": "15.0.0"
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "WITH SENTRY: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "yarn dev",
+      "env": {
+        "WITH_SENTRY": "true"
+      }
+    },
+    {
+      "name": "WITHOUT SENTRY: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "yarn dev",
+      "env": {
+        "WITH_SENTRY": "false"
+      }
+    }
+  ]
 }
 ```
 
-You can test these endpoints directly from the home page using the provided buttons, or test them manually using tools like curl or Postman.
+## Environment Details
 
-## Learn More
+- Next.js version: 15.4.1
+- @sentry/nextjs version: 9.40.0
+- Node.js version: v22.14.0
+- Operating System: macOS 15.5
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [App Router Guide](https://nextjs.org/docs/app)
-- [TypeScript with Next.js](https://nextjs.org/docs/pages/building-your-application/configuring/typescript)
+## Additional Notes
 
-## Deployment
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+- The middleware contains a simple request ID generator and logger
+- Console.log statements have been added at the locations where breakpoints should work
+- The issue affects both middleware & route debugging when WithSentryConfig is enabled
