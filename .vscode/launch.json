@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "WITH SENTRY: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "yarn dev",
+      "env": {
+        "WITH_SENTRY": "true"
+      }
+    },
+    {
+      "name": "WITHOUT SENTRY: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "yarn dev",
+      "env": {
+        "WITH_SENTRY": "false"
+      }
+    },
+  ]
+}
